@@ -1,4 +1,7 @@
-FROM resin/rpi-raspbian:jessie-2015-04-22
+FROM resin/raspberrypi-python
+
+# Enable systemd
+ENV INITSYSTEM on
 
 COPY . /usr/src/app
 WORKDIR /usr/src/app
