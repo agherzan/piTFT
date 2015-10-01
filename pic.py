@@ -6,6 +6,26 @@ import json
 from signal import alarm, signal, SIGALRM
 import picamera
 
+def picButton(channel):
+    print "event", channel, GPIO.input(channel) 
+    with picamera.PiCamera() as camera:
+        print "taking pic"
+        camera.resolution = (1024,768)
+        name = 'image.jpg'
+
+        camera.capture(name, resize=(320, 240))
+        time.sleep(10)
+        camera.close()
+
+        print "Pic to screen"
+        logo = pygame.image.load( "/usr/src/app/" + name)
+        mytft.screen.blit(logo, (0, 0))
+
+        #pygame.display.flip()
+        # # refresh the screen with all the changes
+        pygame.display.update()
+        print "Screen updated"
+
 #set up the screen so we can push stuff onto it.
 class pitft :
     screen = None
@@ -90,6 +110,12 @@ def main():
     #marketName = os.getenv('MARKET', "NASDAQ")
     #print 'market name: '+marketName
 
+    GPIO.setmode(GPIO.BOARD)
+
+    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    GPIO.add_event_detect(40, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
+
     while True:
         #quote = c.get(companyName,marketName)
         #stockTitle = 'Stock: ' + str(quote["t"])
@@ -140,22 +166,7 @@ def main():
         # #add the icon to the screen
         # icon = installPath+ arrowIcon
         # logo = pygame.image.load(icon).convert()
-        with picamera.PiCamera() as camera:
-            print "taking pic"
-            camera.resolution = (1024,768)
-            name = 'image.jpg'
 
-            camera.capture(name, resize=(320, 240))
-            time.sleep(10)
-            camera.close()
-
-            print "Pic to screen"
-            logo = pygame.image.load( "/usr/src/app/" + name).convert()
-            mytft.screen.blit(logo, (0, 0))
-
-            # # refresh the screen with all the changes
-            pygame.display.update()
-            print "Screen updated"
 
         # Wait 'updateRate' seconds until next update
         time.sleep(10)
