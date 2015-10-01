@@ -27,7 +27,7 @@ def gitPush(channel):
     textAnchorY = 10
     textYoffset = 40
 
-    for line in sh( "/usr/src/app/temp.sh", _iter=True):
+    for line in sh.sh( "/usr/src/app/temp.sh", _iter=True):
         print(line)
 
         text_surface = font.render(line, True, colourWhite)
