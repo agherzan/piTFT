@@ -18,7 +18,7 @@ def picButton(channel):
         name = 'image.jpg'
 
         camera.capture(name, resize=(320, 240))
-        time.sleep(10)
+        time.sleep(0.1)
         camera.close()
 
         print "Pic to screen"
