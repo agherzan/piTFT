@@ -11,20 +11,31 @@ import io
 import yuv2rgb
 import atexit
 
-liveFlag = False
+liveFlag = 3
+takePicFlag = False
 
-mytft = 0
-font = 0
+mytft    = 0
+font     = 0
+camera   = 0
+sizeData = 0
+sizeMode = 0
+
+def picButton(channel):
+    global takePicFlag
+    print "event", channel, GPIO.input(channel) 
+    takePicFlag = True
 
 def liveFeed(channel):
-    global liveFlag
+    global liveFlag, camera, sizeMode, sizeData
 
     print "event", channel, GPIO.input(channel)
 
-    if liveFlag :
-        liveFlag = False
-    else :
-        liveFlag = True
+    if liveFlag == 1:
+        liveFlag = 2
+        
+    elif liveFlag == 3:
+        liveFlag = 4
+
     print "live feed is " + str(liveFlag)
 
 def gitPush(channel):
@@ -51,27 +62,6 @@ def gitPush(channel):
 
         pygame.display.update()
         textAnchorY += textYoffset
-
-def picButton(channel):
-    global mytft
-    print "event", channel, GPIO.input(channel) 
-    with picamera.PiCamera() as camera:
-        print "taking pic"
-        camera.resolution = (1024,768)
-        name = 'image.jpg'
-
-        camera.capture(name, resize=(320, 240))
-        time.sleep(0.1)
-        camera.close()
-
-        print "Pic to screen"
-        logo = pygame.image.load( "/usr/src/app/" + name)
-        mytft.screen.blit(logo, (0, 0))
-
-        #pygame.display.flip()
-        # # refresh the screen with all the changes
-        pygame.display.update()
-        print "Screen updated"
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -123,7 +113,7 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
-    global mytft, font, liveFlag
+    global mytft, font, liveFlag, takePicFlag, camera, sizeMode, sizeData
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
@@ -183,18 +173,16 @@ def main():
      [(1920, 1080), (320, 180), (0.1296, 0.2222, 0.7408, 0.5556)], # Med
      [(1440, 1080), (320, 240), (0.2222, 0.2222, 0.5556, 0.5556)]] # Small
 
-    camera            = picamera.PiCamera()
-    atexit.register(camera.close)
-    camera.resolution = sizeData[sizeMode][1]
-    #camera.crop       = sizeData[sizeMode][2]
-    camera.crop       = (0.0, 0.0, 1.0, 1.0)
-
     # Buffers for viewfinder data
     rgb = bytearray(320 * 240 * 3)
     yuv = bytearray(320 * 240 * 3 / 2)
 
     while True:
-        if liveFlag :
+
+ 
+
+        if liveFlag == 1:
+
             stream = io.BytesIO() # Capture into in-memory stream
             camera.capture(stream, use_video_port=True, format='raw')
             stream.seek(0)
@@ -208,6 +196,39 @@ def main():
                 mytft.screen.blit(img,((320 - img.get_width() ) / 2, (240 - img.get_height()) / 2))
 
             pygame.display.update()
+
+            if takePicFlag :
+                print "taking pic"
+                #camera.resolution = (1024,768)
+                name = 'image.jpg'
+
+                liveFlag = 2
+                takePicFlag = False
+                camera.capture(name, resize=(320, 240))
+                #camera.close()
+                #time.sleep(0.1)
+                #camera.capture(name)
+                time.sleep(0.1)
+                camera.close()
+
+                print "Pic to screen"
+                logo = pygame.image.load( "/usr/src/app/" + name)
+                mytft.screen.blit(logo, (0, 0))
+
+                #pygame.display.flip()
+                # # refresh the screen with all the changes
+                pygame.display.update()
+                print "Screen updated"
+        elif liveFlag == 2:
+            camera.close()
+            liveFlag = 3
+        elif liveFlag == 4:
+            camera            = picamera.PiCamera()
+
+            camera.resolution = sizeData[sizeMode][1]
+            camera.crop       = (0.0, 0.0, 1.0, 1.0)
+
+            liveFlag = 1
 
         #quote = c.get(companyName,marketName)
         #stockTitle = 'Stock: ' + str(quote["t"])
