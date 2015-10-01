@@ -26,7 +26,7 @@ def picButton(channel):
     takePicFlag = True
 
 def liveFeed(channel):
-    global liveFlag, camera, sizeMode, sizeData
+    global liveFlag
 
     print "event", channel, GPIO.input(channel)
 
@@ -161,9 +161,11 @@ def main():
     GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
     GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 
+    GPIO.add_event_detect(18, GPIO.RISING, callback=picView)  # add rising edge detection on a channel
     GPIO.add_event_detect(27, GPIO.RISING, callback=liveFeed)  # add rising edge detection on a channel    
     GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
     GPIO.add_event_detect(22, GPIO.RISING, callback=gitPush)  # add rising edge detection on a channel
+
 
     sizeMode = 0
 
@@ -222,6 +224,22 @@ def main():
         elif liveFlag == 2:
             camera.close()
             liveFlag = 3
+        elif liveFlag == 3:
+            if takePicFlag:
+                name = 'image.jpg'
+                if os.path.isfile("/usr/src/app/" + name) :
+                    print "Previous pic to screen"
+                    logo = pygame.image.load( "/usr/src/app/" + name)
+                    mytft.screen.blit(logo, (0, 0))
+
+                    #pygame.display.flip()
+                    # # refresh the screen with all the changes
+                    pygame.display.update()
+                else :
+                    print "no Pic found"
+                takePicFlag = False
+
+            time.sleep(1)
         elif liveFlag == 4:
             camera            = picamera.PiCamera()
 
@@ -229,7 +247,7 @@ def main():
             camera.crop       = (0.0, 0.0, 1.0, 1.0)
 
             liveFlag = 1
-
+        
         #quote = c.get(companyName,marketName)
         #stockTitle = 'Stock: ' + str(quote["t"])
         #print stockTitle
