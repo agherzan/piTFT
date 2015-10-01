@@ -4,6 +4,8 @@ import time
 import urllib2
 import json
 from signal import alarm, signal, SIGALRM
+import picamera
+
 
 # creates a small API to get stock data given symbol and market
 class GoogleFinanceAPI:
@@ -49,6 +51,7 @@ class pitft :
             print 'getting screen size'
             size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
             self.screen = pygame.display.set_mode(size, 0, 32)
+            print size
             alarm(0)
         except Alarm:
             raise KeyboardInterrupt
@@ -151,13 +154,22 @@ def main():
         # #add the icon to the screen
         # icon = installPath+ arrowIcon
         # logo = pygame.image.load(icon).convert()
-        # mytft.screen.blit(logo, (220, 140))
+        with picamera.PiCamera() as camera:
+            camera.resolution = (1024,768)
+            name = 'image.jpg'
 
-        # # refresh the screen with all the changes
-        # pygame.display.update()
+            camera.capture(name, resize=(320, 240))
+            time.sleep(10)
+            camera.close()
+
+            logo = pygame.image.load(name).convert()
+            mytft.screen.blit(logo, (220, 140))
+
+            # # refresh the screen with all the changes
+            pygame.display.update()
 
         # Wait 'updateRate' seconds until next update
-        time.sleep(1000)
+        time.sleep(10000)
 
 if __name__ == '__main__':
     print 'starting main()'
