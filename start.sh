@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "prestart Hellooc"
+echo "Hello"
 
 udevd --daemon
 udevadm trigger

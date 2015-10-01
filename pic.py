@@ -7,9 +7,25 @@ from signal import alarm, signal, SIGALRM
 import picamera
 import RPi.GPIO as GPIO
 import sh
+import io
+import yuv2rgb
+import atexit
+
+liveFlag = False
 
 mytft = 0
 font = 0
+
+def liveFeed(channel):
+    global liveFlag
+
+    print "event", channel, GPIO.input(channel)
+
+    if liveFlag :
+        liveFlag = False
+    else :
+        liveFlag = True
+    print "live feed is " + str(liveFlag)
 
 def gitPush(channel):
     global mytft, font
@@ -107,7 +123,7 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
-    global mytft, font
+    global mytft, font, liveFlag
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
@@ -152,12 +168,47 @@ def main():
 
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+    GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 
+    GPIO.add_event_detect(27, GPIO.RISING, callback=liveFeed)  # add rising edge detection on a channel    
     GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
     GPIO.add_event_detect(22, GPIO.RISING, callback=gitPush)  # add rising edge detection on a channel
 
+    sizeMode = 0
+
+    sizeData = [ # Camera parameters for different size settings
+     # Full res      Viewfinder  Crop window
+     [(2592, 1944), (320, 240), (0.0   , 0.0   , 1.0   , 1.0   )], # Large
+     [(1920, 1080), (320, 180), (0.1296, 0.2222, 0.7408, 0.5556)], # Med
+     [(1440, 1080), (320, 240), (0.2222, 0.2222, 0.5556, 0.5556)]] # Small
+
+    camera            = picamera.PiCamera()
+    atexit.register(camera.close)
+    camera.resolution = sizeData[sizeMode][1]
+    #camera.crop       = sizeData[sizeMode][2]
+    camera.crop       = (0.0, 0.0, 1.0, 1.0)
+
+    # Buffers for viewfinder data
+    rgb = bytearray(320 * 240 * 3)
+    yuv = bytearray(320 * 240 * 3 / 2)
 
     while True:
+        if liveFlag :
+            stream = io.BytesIO() # Capture into in-memory stream
+            camera.capture(stream, use_video_port=True, format='raw')
+            stream.seek(0)
+            stream.readinto(yuv)  # stream -> YUV buffer
+            stream.close()
+            yuv2rgb.convert(yuv, rgb, sizeData[sizeMode][1][0], sizeData[sizeMode][1][1])
+            img = pygame.image.frombuffer(rgb[0: (sizeData[sizeMode][1][0] * sizeData[sizeMode][1][1] * 3)], sizeData[sizeMode][1], 'RGB')
+            if img is None or img.get_height() < 240: # Letterbox, clear background
+                mytft.screen.fill(0)
+            if img:
+                mytft.screen.blit(img,((320 - img.get_width() ) / 2, (240 - img.get_height()) / 2))
+
+            pygame.display.update()
+
         #quote = c.get(companyName,marketName)
         #stockTitle = 'Stock: ' + str(quote["t"])
         #print stockTitle
@@ -210,7 +261,7 @@ def main():
 
 
         # Wait 'updateRate' seconds until next update
-        time.sleep(10)
+        #time.sleep(1)
 
 if __name__ == '__main__':
     print 'starting main()'
