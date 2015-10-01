@@ -5,8 +5,12 @@ import urllib2
 import json
 from signal import alarm, signal, SIGALRM
 import picamera
+import RPi.GPIO as GPIO
+
+mytft = 0
 
 def picButton(channel):
+    global mytft
     print "event", channel, GPIO.input(channel) 
     with picamera.PiCamera() as camera:
         print "taking pic"
@@ -76,6 +80,8 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
+    global mytft
+
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
     print 'starting main()'
@@ -110,11 +116,16 @@ def main():
     #marketName = os.getenv('MARKET', "NASDAQ")
     #print 'market name: '+marketName
 
-    GPIO.setmode(GPIO.BOARD)
+    logo = pygame.image.load( "/usr/src/app/resin.png")
+    mytft.screen.blit(logo, (0, 0))
+
+    pygame.display.update()
+
+    GPIO.setmode(GPIO.BCM)
 
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-    GPIO.add_event_detect(40, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
+    GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
 
     while True:
         #quote = c.get(companyName,marketName)
