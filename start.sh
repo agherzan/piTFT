@@ -15,12 +15,12 @@ if [ ! -c /dev/fb1 ]; then
   mknod /dev/fb1 c $(cat /sys/class/graphics/fb1/dev | tr ':' ' ')
 fi
 
-sleep 10
+sleep 2
 
-echo "rendering image"
-cat resin.raw > /dev/fb1
+#echo "rendering image"
+#cat resin.raw > /dev/fb1
 
-sleep 20
+#sleep 20
 
 echo "starting python script"
 python /usr/src/app/pic.py
