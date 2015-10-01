@@ -6,10 +6,11 @@ import json
 from signal import alarm, signal, SIGALRM
 import picamera
 import RPi.GPIO as GPIO
+import sh
 
 mytft = 0
 font = 0
- 
+
 def gitPush(channel):
     global mytft, font
 
@@ -26,11 +27,14 @@ def gitPush(channel):
     textAnchorY = 10
     textYoffset = 40
 
-    #print the stock title to screen
-    text_surface = font.render("Hello", True, colourWhite)
-    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+    for line in sh( "/usr/src/app/temp.sh", _iter=True):
+        print(line)
 
-    pygame.display.update()
+        text_surface = font.render(line, True, colourWhite)
+        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+        pygame.display.update()
+        textAnchorY += textYoffset
 
 def picButton(channel):
     global mytft

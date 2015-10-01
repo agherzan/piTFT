@@ -3,7 +3,7 @@ FROM resin/raspberrypi-python
 RUN apt-get update && apt-get install -y python-pygame
 
 # Install picamera python module using pip
-RUN pip install picamera RPi.GPIO
+RUN pip install picamera RPi.GPIO sh
 
 ENV INITSYSTEM on
 
