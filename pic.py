@@ -6,20 +6,6 @@ import json
 from signal import alarm, signal, SIGALRM
 import picamera
 
-
-# creates a small API to get stock data given symbol and market
-class GoogleFinanceAPI:
-    def __init__(self):
-        self.prefix = "http://finance.google.com/finance/info?client=ig&q="
-
-    def get(self,symbol,exchange):
-        url = self.prefix+"%s:%s"%(exchange,symbol)
-        u = urllib2.urlopen(url)
-        content = u.read()
-
-        obj = json.loads(content[3:])
-        return obj[0]
-
 #set up the screen so we can push stuff onto it.
 class pitft :
     screen = None
@@ -155,6 +141,7 @@ def main():
         # icon = installPath+ arrowIcon
         # logo = pygame.image.load(icon).convert()
         with picamera.PiCamera() as camera:
+            print "taking pic"
             camera.resolution = (1024,768)
             name = 'image.jpg'
 
@@ -162,14 +149,16 @@ def main():
             time.sleep(10)
             camera.close()
 
-            logo = pygame.image.load(name).convert()
-            mytft.screen.blit(logo, (220, 140))
+            print "Pic to screen"
+            logo = pygame.image.load( "/usr/src/app/" + name).convert()
+            mytft.screen.blit(logo, (0, 0))
 
             # # refresh the screen with all the changes
             pygame.display.update()
+            print "Screen updated"
 
         # Wait 'updateRate' seconds until next update
-        time.sleep(10000)
+        time.sleep(10)
 
 if __name__ == '__main__':
     print 'starting main()'
