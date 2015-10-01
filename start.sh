@@ -19,3 +19,8 @@ sleep 10
 
 echo "rendering image"
 cat resin.raw > /dev/fb1
+
+sleep 20
+
+echo "starting python script"
+python /usr/src/app/pic.py
