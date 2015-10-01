@@ -8,6 +8,29 @@ import picamera
 import RPi.GPIO as GPIO
 
 mytft = 0
+font = 0
+ 
+def gitPush(channel):
+    global mytft, font
+
+    colourWhite = (255, 255, 255)
+    colourBlack = (0, 0, 0)
+    colourGreen = (3, 192, 60)
+    colourRed = (220, 69, 69)
+
+    print "event", channel, GPIO.input(channel) 
+    # clear the screen
+    mytft.screen.fill(colourBlack)
+    # set the anchor/positions for the current stock data text
+    textAnchorX = 10
+    textAnchorY = 10
+    textYoffset = 40
+
+    #print the stock title to screen
+    text_surface = font.render("Hello", True, colourWhite)
+    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+    pygame.display.update()
 
 def picButton(channel):
     global mytft
@@ -80,7 +103,7 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
-    global mytft
+    global mytft, font
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
@@ -124,8 +147,11 @@ def main():
     GPIO.setmode(GPIO.BCM)
 
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
+    GPIO.add_event_detect(22, GPIO.RISING, callback=gitPush)  # add rising edge detection on a channel
+
 
     while True:
         #quote = c.get(companyName,marketName)
