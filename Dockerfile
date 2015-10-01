@@ -1,9 +1,10 @@
 FROM resin/raspberrypi-python
 
-# Enable systemd
+RUN apt-get update && apt-get install -y python-pygame
+
 ENV INITSYSTEM on
 
 COPY . /usr/src/app
 WORKDIR /usr/src/app
 
-CMD ./prestart.sh && ./start.sh
+CMD ["bash", "/usr/src/app/start.sh"]
