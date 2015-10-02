@@ -37,6 +37,13 @@ git config --global user.name $NAME
 
 ssh -T git@github.com -i /data/id_rsa
 
+if [ "$ERASE" == "TRUE" ]; then
+
+	echo "Erasing project"
+	cd /data
+	rm -rf piTFT
+fi
+
 echo "git clone"
 DIRECTORY="/data/piTFT"    # /   (root directory)
 if [ -d "$DIRECTORY" ]; then

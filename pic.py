@@ -245,6 +245,8 @@ def main():
                 colourGreen = (3, 192, 60)
                 colourRed = (220, 69, 69)
 
+                noCommitFlag = False
+
                 # clear the screen
                 mytft.screen.fill(colourBlack)
                 # set the anchor/positions for the current stock data text
@@ -264,6 +266,10 @@ def main():
                     line.rstrip('\n')
                     line.rstrip('\r')
 
+                    if line.find("nothing to commit") == 0 :
+                        print "found"
+                        noCommitFlag = True
+
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
 
@@ -274,6 +280,19 @@ def main():
                         mytft.screen.fill(colourBlack)
 
                     time.sleep(0.1)
+
+                if noCommitFlag == True:
+
+                    line = "Please take a Pic "
+                    print line
+                    text_surface = font.render(line, True, colourRed)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                    pygame.display.update()
+
+                    pushFlag = False 
+
+                    continue
 
                 time.sleep(5)
 
@@ -319,7 +338,7 @@ def main():
                 textAnchorY += textYoffset
                 pygame.display.update()
 
-                for line in sh.git( "commit", "-m", "Auto commit", _iter=True):
+                for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
                     print(line)
                     line.rstrip('\n')
                     line.rstrip('\r')
@@ -349,7 +368,7 @@ def main():
                 textAnchorY += textYoffset
                 pygame.display.update()
 
-                for line in sh.git( "push", "resin", "master", "--force", _iter=True):
+                for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
                     print(line)
                     line.rstrip('\n')
                     line.rstrip('\r')
