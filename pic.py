@@ -22,7 +22,7 @@ camera   = 0
 sizeData = 0
 sizeMode = 0
 
-
+os.chdir("/data/piTFT")
 
 def sleepMode():
     global liveFlag, sleepFlag
@@ -63,16 +63,108 @@ def gitPush(channel):
     # set the anchor/positions for the current stock data text
     textAnchorX = 10
     textAnchorY = 10
-    textYoffset = 40
+    textYoffset = 10
 
-    for line in sh.sh( "/usr/src/app/temp.sh", _iter=True):
+    line = "git status"
+    print line
+    text_surface = font.render(line, True, colourRed)
+    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+    textAnchorY += textYoffset
+
+    for line in sh.git( "status", _iter=True):
         print(line)
+        line.rstrip('\n')
+        line.rstrip('\r')
 
         text_surface = font.render(line, True, colourWhite)
         mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
 
         pygame.display.update()
         textAnchorY += textYoffset
+        if textAnchorY + textYoffset > 240:
+            textAnchorY = 10
+            mytft.screen.fill(colourBlack)
+
+    time.sleep(5)
+
+    mytft.screen.fill(colourBlack)
+
+    textAnchorX = 10
+    textAnchorY = 10    
+
+    line = "git add ."
+    print line
+    text_surface = font.render(line, True, colourRed)
+    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+    textAnchorY += textYoffset
+
+    for line in sh.git( "add","image.jpg", _iter=True):
+        print(line)
+        line.rstrip('\n')
+        line.rstrip('\r')
+
+        text_surface = font.render(line, True, colourWhite)
+        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+        pygame.display.update()
+        textAnchorY += textYoffset
+        if textAnchorY + textYoffset > 240:
+            textAnchorY = 10
+            mytft.screen.fill(colourBlack)
+
+    time.sleep(5)
+
+    mytft.screen.fill(colourBlack)
+
+    textAnchorX = 10
+    textAnchorY = 10
+
+    line = "git commit -m "
+    print line
+    text_surface = font.render(line, True, colourRed)
+    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+    textAnchorY += textYoffset
+
+    for line in sh.git( "commit", "-m", "Auto commit", _iter=True):
+        print(line)
+        line.rstrip('\n')
+        line.rstrip('\r')
+
+        text_surface = font.render(line, True, colourWhite)
+        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+        pygame.display.update()
+        textAnchorY += textYoffset
+        if textAnchorY + textYoffset > 240:
+            textAnchorY = 10
+            mytft.screen.fill(colourBlack)
+   
+    time.sleep(5)
+
+    mytft.screen.fill(colourBlack)
+
+    textAnchorX = 10
+    textAnchorY = 10
+
+    line = "git push resin master"
+    print line
+    text_surface = font.render(line, True, colourRed)
+    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+    textAnchorY += textYoffset
+
+    for line in sh.git( "push", "resin", "master", "--force", _iter=True):
+        print(line)
+        line.rstrip('\n')
+        line.rstrip('\r')
+
+        text_surface = font.render(line, True, colourWhite)
+        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+        pygame.display.update()
+        textAnchorY += textYoffset
+        if textAnchorY + textYoffset > 240:
+            textAnchorY = 10
+            mytft.screen.fill(colourBlack)
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -128,15 +220,12 @@ def main():
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
-    print 'starting main()'
+
     # font colours
     colourWhite = (255, 255, 255)
     colourBlack = (0, 0, 0)
     colourGreen = (3, 192, 60)
     colourRed = (220, 69, 69)
-
-    #this is how often we check for new stocks
-    updateRate = 180 # seconds
 
     # Create an instance of the pitft class
     mytft = pitft()
@@ -147,10 +236,7 @@ def main():
     # set up the fonts
     # choose the font
     fontpath = pygame.font.match_font('dejavusansmono')
-    font = pygame.font.Font(fontpath, 40)
-
-    #create instance of stock api
-    #c = GoogleFinanceAPI()
+    font = pygame.font.Font(fontpath, 10)
 
     #read the ENV VAR, use GE if 'STOCK' isn't there
     #companyName = os.getenv('STOCK', "GE")
@@ -225,7 +311,7 @@ def main():
                 camera.close()
 
                 print "Pic to screen"
-                logo = pygame.image.load( "/usr/src/app/" + name)
+                logo = pygame.image.load(name)
                 mytft.screen.blit(logo, (0, 0))
 
                 #pygame.display.flip()
@@ -246,9 +332,9 @@ def main():
         elif liveFlag == 3:
             if takePicFlag:
                 name = 'image.jpg'
-                if os.path.isfile("/usr/src/app/" + name) :
+                if os.path.isfile(name) :
                     print "Previous pic to screen"
-                    logo = pygame.image.load( "/usr/src/app/" + name)
+                    logo = pygame.image.load(name)
                     mytft.screen.blit(logo, (0, 0))
 
                     #pygame.display.flip()

@@ -22,5 +22,35 @@ sleep 2
 
 #sleep 20
 
+#Set the root password as root if not set as an ENV variable
+export PASSWD=${PASSWD:=root}
+#Set the root password
+echo "root:$PASSWD" | chpasswd
+
+echo "starting ssh agent"
+eval "$(ssh-agent -s)"
+ssh-add /data/id_rsa
+ssh-add -l
+
+git config --global user.email $EMAIL
+git config --global user.name $NAME
+
+ssh -T git@github.com -i /data/id_rsa
+
+echo "git clone"
+DIRECTORY="/data/piTFT"    # /   (root directory)
+if [ -d "$DIRECTORY" ]; then
+	echo "Project exists"
+	cd /data/piTFT
+	git pull
+else
+	echo "Project doesnt exist, cloning"
+	cd /data
+	git clone https://github.com/nchronas/piTFT.git
+fi
+
+cd /data/piTFT
+git remote add resin nchronas@git.resin.io:nchronas/pitft.git
+
 echo "starting python script"
 python /usr/src/app/pic.py
