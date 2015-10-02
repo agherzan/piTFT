@@ -49,7 +49,6 @@ else
 	git clone https://github.com/nchronas/piTFT.git
 	cd /data/piTFT
 	git remote add resin $REMOTE
-
 fi
 
 
