@@ -15,6 +15,7 @@ liveFlag    = 3
 
 takePicFlag = False
 sleepFlag   = False
+pushFlag    = False 
 
 mytft    = 0
 font     = 0
@@ -50,121 +51,14 @@ def liveFeed(channel):
     print "live feed is " + str(liveFlag)
 
 def gitPush(channel):
-    global mytft, font
-
-    colourWhite = (255, 255, 255)
-    colourBlack = (0, 0, 0)
-    colourGreen = (3, 192, 60)
-    colourRed = (220, 69, 69)
+    global pushFlag, liveFlag 
 
     print "event", channel, GPIO.input(channel) 
-    # clear the screen
-    mytft.screen.fill(colourBlack)
-    # set the anchor/positions for the current stock data text
-    textAnchorX = 10
-    textAnchorY = 10
-    textYoffset = 10
+    
+    pushFlag = True
 
-    line = "git status"
-    print line
-    text_surface = font.render(line, True, colourRed)
-    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-    textAnchorY += textYoffset
-
-    for line in sh.git( "status", _iter=True):
-        print(line)
-        line.rstrip('\n')
-        line.rstrip('\r')
-
-        text_surface = font.render(line, True, colourWhite)
-        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        pygame.display.update()
-        textAnchorY += textYoffset
-        if textAnchorY + textYoffset > 240:
-            textAnchorY = 10
-            mytft.screen.fill(colourBlack)
-
-    time.sleep(5)
-
-    mytft.screen.fill(colourBlack)
-
-    textAnchorX = 10
-    textAnchorY = 10    
-
-    line = "git add ."
-    print line
-    text_surface = font.render(line, True, colourRed)
-    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-    textAnchorY += textYoffset
-
-    for line in sh.git( "add","image.jpg", _iter=True):
-        print(line)
-        line.rstrip('\n')
-        line.rstrip('\r')
-
-        text_surface = font.render(line, True, colourWhite)
-        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        pygame.display.update()
-        textAnchorY += textYoffset
-        if textAnchorY + textYoffset > 240:
-            textAnchorY = 10
-            mytft.screen.fill(colourBlack)
-
-    time.sleep(5)
-
-    mytft.screen.fill(colourBlack)
-
-    textAnchorX = 10
-    textAnchorY = 10
-
-    line = "git commit -m "
-    print line
-    text_surface = font.render(line, True, colourRed)
-    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-    textAnchorY += textYoffset
-
-    for line in sh.git( "commit", "-m", "Auto commit", _iter=True):
-        print(line)
-        line.rstrip('\n')
-        line.rstrip('\r')
-
-        text_surface = font.render(line, True, colourWhite)
-        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        pygame.display.update()
-        textAnchorY += textYoffset
-        if textAnchorY + textYoffset > 240:
-            textAnchorY = 10
-            mytft.screen.fill(colourBlack)
-   
-    time.sleep(5)
-
-    mytft.screen.fill(colourBlack)
-
-    textAnchorX = 10
-    textAnchorY = 10
-
-    line = "git push resin master"
-    print line
-    text_surface = font.render(line, True, colourRed)
-    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-    textAnchorY += textYoffset
-
-    for line in sh.git( "push", "resin", "master", "--force", _iter=True):
-        print(line)
-        line.rstrip('\n')
-        line.rstrip('\r')
-
-        text_surface = font.render(line, True, colourWhite)
-        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        pygame.display.update()
-        textAnchorY += textYoffset
-        if textAnchorY + textYoffset > 240:
-            textAnchorY = 10
-            mytft.screen.fill(colourBlack)
+    if liveFlag == 1:
+        liveFlag = 2
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -216,7 +110,7 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
-    global mytft, font, liveFlag, takePicFlag, camera, sizeMode, sizeData
+    global mytft, font, liveFlag, takePicFlag, pushFlag, camera, sizeMode, sizeData
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
@@ -343,6 +237,141 @@ def main():
                 else :
                     print "no Pic found"
                 takePicFlag = False
+            
+            elif pushFlag :
+
+                colourWhite = (255, 255, 255)
+                colourBlack = (0, 0, 0)
+                colourGreen = (3, 192, 60)
+                colourRed = (220, 69, 69)
+
+                # clear the screen
+                mytft.screen.fill(colourBlack)
+                # set the anchor/positions for the current stock data text
+                textAnchorX = 10
+                textAnchorY = 10
+                textYoffset = 10
+
+                line = "git status"
+                print line
+                text_surface = font.render(line, True, colourRed)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                textAnchorY += textYoffset
+                pygame.display.update()
+
+                for line in sh.git( "status", _iter=True):
+                    print(line)
+                    line.rstrip('\n')
+                    line.rstrip('\r')
+
+                    text_surface = font.render(line, True, colourWhite)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                    pygame.display.update()
+                    textAnchorY += textYoffset
+                    if textAnchorY + textYoffset > 240:
+                        textAnchorY = 10
+                        mytft.screen.fill(colourBlack)
+
+                    time.sleep(0.1)
+
+                time.sleep(5)
+
+                mytft.screen.fill(colourBlack)
+
+                textAnchorX = 10
+                textAnchorY = 10    
+
+                line = "git add ."
+                print line
+                text_surface = font.render(line, True, colourRed)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                textAnchorY += textYoffset
+                pygame.display.update()
+
+                for line in sh.git.add ("image.jpg", _iter=True):
+                    print(line)
+                    line.rstrip('\n')
+                    line.rstrip('\r')
+
+                    text_surface = font.render(line, True, colourWhite)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                    pygame.display.update()
+                    textAnchorY += textYoffset
+                    if textAnchorY + textYoffset > 240:
+                        textAnchorY = 10
+                        mytft.screen.fill(colourBlack)
+
+                    time.sleep(0.1)
+
+                time.sleep(5)
+
+                mytft.screen.fill(colourBlack)
+
+                textAnchorX = 10
+                textAnchorY = 10
+
+                line = "git commit -m "
+                print line
+                text_surface = font.render(line, True, colourRed)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                textAnchorY += textYoffset
+                pygame.display.update()
+
+                for line in sh.git( "commit", "-m", "Auto commit", _iter=True):
+                    print(line)
+                    line.rstrip('\n')
+                    line.rstrip('\r')
+
+                    text_surface = font.render(line, True, colourWhite)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                    pygame.display.update()
+                    textAnchorY += textYoffset
+                    if textAnchorY + textYoffset > 240:
+                        textAnchorY = 10
+                        mytft.screen.fill(colourBlack)
+                    
+                    time.sleep(0.1)           
+
+                time.sleep(5)
+
+                mytft.screen.fill(colourBlack)
+
+                textAnchorX = 10
+                textAnchorY = 10
+
+                line = "git push resin master"
+                print line
+                text_surface = font.render(line, True, colourRed)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                textAnchorY += textYoffset
+                pygame.display.update()
+
+                for line in sh.git( "push", "resin", "master", "--force", _iter=True):
+                    print(line)
+                    line.rstrip('\n')
+                    line.rstrip('\r')
+
+                    text_surface = font.render(line, True, colourWhite)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                    pygame.display.update()
+                    textAnchorY += textYoffset
+                    if textAnchorY + textYoffset > 240:
+                        textAnchorY = 10
+                        mytft.screen.fill(colourBlack)
+
+                    time.sleep(0.1)
+
+                line = "Finished"
+                print line
+                text_surface = font.render(line, True, colourGreen)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                pygame.display.update()
+
+                pushFlag = False 
 
             time.sleep(1)
         elif liveFlag == 4:

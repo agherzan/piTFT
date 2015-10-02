@@ -1,0 +1,2 @@
+host git.resin.io
+ IdentityFile /data/id_rsa

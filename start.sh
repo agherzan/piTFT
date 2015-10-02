@@ -47,10 +47,11 @@ else
 	echo "Project doesnt exist, cloning"
 	cd /data
 	git clone https://github.com/nchronas/piTFT.git
+	cd /data/piTFT
+	git remote add resin $REMOTE
+
 fi
 
-cd /data/piTFT
-git remote add resin nchronas@git.resin.io:nchronas/pitft.git
 
 echo "starting python script"
 python /usr/src/app/pic.py
