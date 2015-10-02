@@ -9,16 +9,27 @@ import RPi.GPIO as GPIO
 import sh
 import io
 import yuv2rgb
-import atexit
+from threading import Timer
 
-liveFlag = 3
+liveFlag    = 3
+
 takePicFlag = False
+sleepFlag   = False
 
 mytft    = 0
 font     = 0
 camera   = 0
 sizeData = 0
 sizeMode = 0
+
+
+
+def sleepMode():
+    global liveFlag, sleepFlag
+    print "hello, world"
+
+    if liveFlag == 1:
+        liveFlag = 2
 
 def picButton(channel):
     global takePicFlag
@@ -159,9 +170,10 @@ def main():
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
-    GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
+#    GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 
-    GPIO.add_event_detect(18, GPIO.RISING, callback=picView)  # add rising edge detection on a channel
+ 
+#    GPIO.add_event_detect(18, GPIO.RISING, callback=picView)  # add rising edge detection on a channel
     GPIO.add_event_detect(27, GPIO.RISING, callback=liveFeed)  # add rising edge detection on a channel    
     GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
     GPIO.add_event_detect(22, GPIO.RISING, callback=gitPush)  # add rising edge detection on a channel
@@ -179,9 +191,8 @@ def main():
     rgb = bytearray(320 * 240 * 3)
     yuv = bytearray(320 * 240 * 3 / 2)
 
-    while True:
 
- 
+    while True:
 
         if liveFlag == 1:
 
@@ -222,8 +233,16 @@ def main():
                 pygame.display.update()
                 print "Screen updated"
         elif liveFlag == 2:
+            
             camera.close()
+            
+            logo = pygame.image.load( "/usr/src/app/resin.png")
+            mytft.screen.blit(logo, (0, 0))
+
+            pygame.display.update()
+
             liveFlag = 3
+
         elif liveFlag == 3:
             if takePicFlag:
                 name = 'image.jpg'
@@ -241,6 +260,10 @@ def main():
 
             time.sleep(1)
         elif liveFlag == 4:
+
+            t = Timer(30.0, sleepMode)
+            t.start() 
+
             camera            = picamera.PiCamera()
 
             camera.resolution = sizeData[sizeMode][1]
