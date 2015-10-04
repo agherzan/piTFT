@@ -11,8 +11,6 @@ import io
 import yuv2rgb
 from threading import Timer
 import pickle
-import string
-
 
 liveFlag    = 3
 
@@ -266,9 +264,11 @@ def main():
                 textAnchorY += textYoffset
                 pygame.display.update()
 
+                stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
+
                 for line in sh.git( "status", _iter=True):
                     print(line)
-                    line = filter(string.printable.__contains__, line)
+                    line = stripped(line)
 
                     if line.find("nothing to commit") == 0 :
                         print "found"
@@ -317,7 +317,7 @@ def main():
 
                 for line in sh.git.add ("image.jpg", "save.p", _iter=True):
                     print(line)
-                    line = filter(string.printable.__contains__, line)
+                    line = stripped(line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -346,7 +346,7 @@ def main():
 
                 for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
                     print(line)
-                    line = filter(string.printable.__contains__, line)
+                    line = stripped(line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -377,12 +377,7 @@ def main():
 
                 for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
                     print(line)
-                    line = filter(string.printable.__contains__, line)
-
-                    
-                    if line.find("Image uploaded successfully!") == 0 :
-                        print "Unicorn found"
-                        color = colourPink
+                    line = stripped(line)
 
                     text_surface = font.render(line, True, color)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -392,6 +387,10 @@ def main():
                     if textAnchorY + textYoffset > 240:
                         textAnchorY = 10
                         mytft.screen.fill(colourBlack)
+
+                    if line.find("Build took") == 0 :
+                        print "Unicorn found"
+                        color = colourPink
 
                     time.sleep(0.1)
 
