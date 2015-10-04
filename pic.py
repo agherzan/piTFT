@@ -248,6 +248,7 @@ def main():
                 colourBlack = (0, 0, 0)
                 colourGreen = (3, 192, 60)
                 colourRed = (220, 69, 69)
+                colourPink = (255, 20, 147)
 
                 noCommitFlag = False
 
@@ -267,7 +268,7 @@ def main():
 
                 for line in sh.git( "status", _iter=True):
                     print(line)
-                    line=filter(lambda x: x in string.printable, line)
+                    line = filter(string.printable.__contains__, line)
 
                     if line.find("nothing to commit") == 0 :
                         print "found"
@@ -316,7 +317,7 @@ def main():
 
                 for line in sh.git.add ("image.jpg", "save.p", _iter=True):
                     print(line)
-                    line=filter(lambda x: x in string.printable, line)
+                    line = filter(string.printable.__contains__, line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -345,7 +346,7 @@ def main():
 
                 for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
                     print(line)
-                    line=filter(lambda x: x in string.printable, line)
+                    line = filter(string.printable.__contains__, line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -372,11 +373,18 @@ def main():
                 textAnchorY += textYoffset
                 pygame.display.update()
 
+                color = colourWhite
+
                 for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
                     print(line)
-                    line=filter(lambda x: x in string.printable, line)
+                    line = filter(string.printable.__contains__, line)
 
-                    text_surface = font.render(line, True, colourWhite)
+                    
+                    if line.find("Image uploaded successfully!") == 0 :
+                        print "Unicorn found"
+                        color = colourPink
+
+                    text_surface = font.render(line, True, color)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
 
                     pygame.display.update()
