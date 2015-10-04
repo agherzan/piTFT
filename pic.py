@@ -11,6 +11,7 @@ import io
 import yuv2rgb
 from threading import Timer
 import pickle
+import string
 
 
 liveFlag    = 3
@@ -266,8 +267,7 @@ def main():
 
                 for line in sh.git( "status", _iter=True):
                     print(line)
-                    line.rstrip('\n')
-                    line.rstrip('\r')
+                    line=filter(lambda x: x in string.printable, line)
 
                     if line.find("nothing to commit") == 0 :
                         print "found"
@@ -316,8 +316,7 @@ def main():
 
                 for line in sh.git.add ("image.jpg", "save.p", _iter=True):
                     print(line)
-                    line.rstrip('\n')
-                    line.rstrip('\r')
+                    line=filter(lambda x: x in string.printable, line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -346,8 +345,7 @@ def main():
 
                 for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
                     print(line)
-                    line.rstrip('\n')
-                    line.rstrip('\r')
+                    line=filter(lambda x: x in string.printable, line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
@@ -376,8 +374,7 @@ def main():
 
                 for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
                     print(line)
-                    line.rstrip('\n')
-                    line.rstrip('\r')
+                    line=filter(lambda x: x in string.printable, line)
 
                     text_surface = font.render(line, True, colourWhite)
                     mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
