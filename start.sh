@@ -41,20 +41,20 @@ if [ "$ERASE" == "TRUE" ]; then
 
 	echo "Erasing project"
 	cd /data
-	rm -rf piTFT
+	rm -rf piTFT_mBeast
 fi
 
 echo "git clone"
-DIRECTORY="/data/piTFT"    # /   (root directory)
+DIRECTORY="/data/piTFT_mBeast"    # /   (root directory)
 if [ -d "$DIRECTORY" ]; then
 	echo "Project exists"
-	cd /data/piTFT
+	cd /data/piTFT_mBeast
 	git pull
 else
 	echo "Project doesnt exist, cloning"
 	cd /data
-	git clone https://github.com/nchronas/piTFT.git
-	cd /data/piTFT
+	git clone https://github.com/nchronas/piTFT_mBeast.git
+	cd /data/piTFT_mBeast
 	git remote add resin $REMOTE
 fi
 

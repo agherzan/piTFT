@@ -10,6 +10,8 @@ import sh
 import io
 import yuv2rgb
 from threading import Timer
+import pickle
+
 
 liveFlag    = 3
 
@@ -23,7 +25,7 @@ camera   = 0
 sizeData = 0
 sizeMode = 0
 
-os.chdir("/data/piTFT")
+os.chdir("/data/piTFT_mBeast")
 
 def sleepMode():
     global liveFlag, sleepFlag
@@ -171,6 +173,7 @@ def main():
     rgb = bytearray(320 * 240 * 3)
     yuv = bytearray(320 * 240 * 3 / 2)
 
+    updates = pickle.load(open( "save.p", "rb" ) )
 
     while True:
 
@@ -294,6 +297,9 @@ def main():
 
                     continue
 
+                updates += 1 
+                pickle.dump( updates, open( "save.p", "wb" ))
+
                 time.sleep(5)
 
                 mytft.screen.fill(colourBlack)
@@ -308,7 +314,7 @@ def main():
                 textAnchorY += textYoffset
                 pygame.display.update()
 
-                for line in sh.git.add ("image.jpg", _iter=True):
+                for line in sh.git.add ("image.jpg", "save.p", _iter=True):
                     print(line)
                     line.rstrip('\n')
                     line.rstrip('\r')
