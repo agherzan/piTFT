@@ -30,8 +30,8 @@ def sleepMode():
     global liveFlag, sleepFlag
     print "hello, world"
 
-    if liveFlag == 1:
-        liveFlag = 2
+    #if liveFlag == 1:
+    #    liveFlag = 2
 
 def picButton(channel):
     global takePicFlag
@@ -267,7 +267,6 @@ def main():
 
                 stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
 
-                sc = []
 
                 for line in sh.git( "status", _iter=True):
                     print(line)
@@ -277,21 +276,14 @@ def main():
                         print "found"
                         noCommitFlag = True
 
-                    sc.append(line)
-                    if len(sc) >= listMax :
-                        sc.pop(0)
-
-                    mytft.screen.fill(colourBlack)
-                    for lines in sc:
-                        text_surface = font.render(line, True, colourWhite)
-                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                        textAnchorY += textYoffset
+                    text_surface = font.render(line, True, colourWhite)
+                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
 
                     pygame.display.update()
-                    #textAnchorY += textYoffset
-                    #if textAnchorY + textYoffset > 240:
-                    #    textAnchorY = 10
-                    #    mytft.screen.fill(colourBlack)
+                    textAnchorY += textYoffset
+                    if textAnchorY + textYoffset > 240:
+                        textAnchorY = 10
+                        mytft.screen.fill(colourBlack)
 
                     time.sleep(0.1)
 
@@ -385,6 +377,10 @@ def main():
 
                 color = colourWhite
 
+                sc = []
+
+                sc.append("git push resin master")
+
                 for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
                     print(line)
                     line = stripped(line)
@@ -404,17 +400,23 @@ def main():
 
                     sc.append(line)
                     if len(sc) >= listMax :
-                        sc.pop(0)
+                        sc.pop(1)
 
+                    textAnchorY = 0
                     mytft.screen.fill(colourBlack)
-                    for lines in sc:
-                        text_surface = font.render(line, True, colourWhite)
-                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                        textAnchorY += textYoffset
+                    for idx, lines in enumerate(sc):
+                        if idx == 0:
+                            text_surface = font.render(lines, True, colourRed)
+                            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                            textAnchorY += textYoffset
+                        else:
+                            text_surface = font.render(lines, True, color)
+                            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                            textAnchorY += textYoffset
 
                     pygame.display.update()
 
-                    time.sleep(0.1)
+                    #time.sleep(0.1)
 
                 line = "Finished"
                 print line
