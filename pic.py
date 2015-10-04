@@ -12,7 +12,7 @@ import yuv2rgb
 from threading import Timer
 import pickle
 
-liveFlag    = 3
+liveFlag    = 1
 
 takePicFlag = False
 sleepFlag   = False
