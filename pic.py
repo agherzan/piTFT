@@ -12,7 +12,7 @@ import yuv2rgb
 from threading import Timer
 import pickle
 
-liveFlag    = 1
+liveFlag    = 4
 
 takePicFlag = False
 sleepFlag   = False
@@ -256,6 +256,7 @@ def main():
                 textAnchorX = 10
                 textAnchorY = 10
                 textYoffset = 10
+                listMax = 240/textYoffset
 
                 line = "git status"
                 print line
@@ -266,6 +267,8 @@ def main():
 
                 stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
 
+                sc = []
+
                 for line in sh.git( "status", _iter=True):
                     print(line)
                     line = stripped(line)
@@ -274,14 +277,21 @@ def main():
                         print "found"
                         noCommitFlag = True
 
-                    text_surface = font.render(line, True, colourWhite)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                    sc.append(line)
+                    if len(sc) >= listMax :
+                        sc.pop(0)
+
+                    mytft.screen.fill(colourBlack)
+                    for lines in sc:
+                        text_surface = font.render(line, True, colourWhite)
+                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                        textAnchorY += textYoffset
 
                     pygame.display.update()
-                    textAnchorY += textYoffset
-                    if textAnchorY + textYoffset > 240:
-                        textAnchorY = 10
-                        mytft.screen.fill(colourBlack)
+                    #textAnchorY += textYoffset
+                    #if textAnchorY + textYoffset > 240:
+                    #    textAnchorY = 10
+                    #    mytft.screen.fill(colourBlack)
 
                     time.sleep(0.1)
 
@@ -379,26 +389,38 @@ def main():
                     print(line)
                     line = stripped(line)
 
-                    text_surface = font.render(line, True, color)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                    #text_surface = font.render(line, True, color)
+                    #mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
 
-                    pygame.display.update()
-                    textAnchorY += textYoffset
-                    if textAnchorY + textYoffset > 240:
-                        textAnchorY = 10
-                        mytft.screen.fill(colourBlack)
+                    #pygame.display.update()
+                    #textAnchorY += textYoffset
+                    #if textAnchorY + textYoffset > 240:
+                    #    textAnchorY = 10
+                    #    mytft.screen.fill(colourBlack)
 
                     if line.find("Build took") == 0 :
                         print "Unicorn found"
                         color = colourPink
 
+                    sc.append(line)
+                    if len(sc) >= listMax :
+                        sc.pop(0)
+
+                    mytft.screen.fill(colourBlack)
+                    for lines in sc:
+                        text_surface = font.render(line, True, colourWhite)
+                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                        textAnchorY += textYoffset
+
+                    pygame.display.update()
+
                     time.sleep(0.1)
 
                 line = "Finished"
                 print line
-                text_surface = font.render(line, True, colourGreen)
-                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                pygame.display.update()
+                #text_surface = font.render(line, True, colourGreen)
+                #mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                #pygame.display.update()
 
                 pushFlag = False 
 
