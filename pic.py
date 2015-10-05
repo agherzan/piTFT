@@ -28,11 +28,10 @@ sizeMode = 0
 os.chdir("/data/piTFT_mBeast")
 
 def sleepMode():
-    global liveFlag, sleepFlag
-    print "hello, world"
+    global pushFlag
+    print "You can take push again"
 
-    #if liveFlag == 1:
-    #    liveFlag = 2
+    pushFlag = 0
 
 def picButton(channel):
     global takePicFlag
@@ -57,13 +56,17 @@ def gitPush(channel):
 
     print "event", channel, GPIO.input(channel) 
     
-    if pushFlag == 1:
-        pushFlag = 2
-    else:
+    if pushFlag == 2:
+        pushFlag = 3
+
+        if liveFlag == 1:
+            liveFlag = 3
+
+    elif pushFlag == 0:
         pushFlag = 1
 
-    if liveFlag == 1:
-        liveFlag = 3
+        if liveFlag == 1:
+            liveFlag = 3
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -211,7 +214,7 @@ def main():
                 # # refresh the screen with all the changes
                 pygame.display.update()
                 print "Screen updated"
-                time.sleep(10)
+                time.sleep(5)
                 camera.resolution = sizeData[sizeMode][1]
                 camera.crop       = (0.0, 0.0, 1.0, 1.0)
 
@@ -297,7 +300,7 @@ def main():
 
                     pygame.display.update()
 
-                    pushFlag = False 
+                    pushFlag = 0 
 
                     continue
 
@@ -362,11 +365,13 @@ def main():
                     
                     time.sleep(0.1)           
 
+                pushFlag = 2
+                     
                 time.sleep(10)
 
 
 
-            else:
+            elif pushFlag == 3:
 
 
                 mytft.screen.fill(colourBlack)
@@ -391,9 +396,7 @@ def main():
                     print(line)
                     line = stripped(line)
 
-                    if line.find("Build took") == 0 :
-                        print "Unicorn found"
-                        color = colourPink
+                    color = colourWhite                    
 
                     sc.append(line)
                     if len(sc) >= listMax :
@@ -407,6 +410,10 @@ def main():
                             mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
                             textAnchorY += textYoffset
                         else:
+                            if lines.find("Build took") == 0 or  lines.find("_.-\' : ``") == 0 :
+                                print "Unicorn found"
+                                color = colourPink
+
                             text_surface = font.render(lines, True, color)
                             mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
                             textAnchorY += textYoffset
@@ -416,14 +423,16 @@ def main():
                     time.sleep(0.1)
 
                 pushFlag = 0
+
+                #t = Timer(30.0, sleepMode)
+                #t.start() 
+                
+                
                 time.sleep(10)
 
             liveFlag = 1
             
         elif liveFlag == 4:
-
-            t = Timer(30.0, sleepMode)
-            t.start() 
 
             camera            = picamera.PiCamera()
 
