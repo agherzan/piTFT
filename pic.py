@@ -200,7 +200,7 @@ def main():
                 #camera.resolution = (1024,768)
                 name = 'image.jpg'
 
-                liveFlag = 1
+                liveFlag = 3
                 pushFlag = 0
                 takePicFlag = False
                 camera.capture(name, resize=(320, 240))
@@ -230,19 +230,6 @@ def main():
         #     liveFlag = 3
 
         elif liveFlag == 3:
-            # if takePicFlag:
-            #     name = 'image.jpg'
-            #     if os.path.isfile(name) :
-            #         print "Previous pic to screen"
-            #         logo = pygame.image.load(name)
-            #         mytft.screen.blit(logo, (0, 0))
-
-            #         #pygame.display.flip()
-            #         # # refresh the screen with all the changes
-            #         pygame.display.update()
-            #     else :
-            #         print "no Pic found"
-            #     takePicFlag = False
             
             if pushFlag == 1:
 
@@ -410,7 +397,7 @@ def main():
                             mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
                             textAnchorY += textYoffset
                         else:
-                            if lines.find("Build took") == 0 or  lines.find("_.-\' : ``") == 0 :
+                            if lines.find("Build took") == 0 or  lines.find("_.-(6") == 0 :
                                 print "Unicorn found"
                                 color = colourPink
 
