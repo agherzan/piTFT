@@ -13,10 +13,11 @@ from threading import Timer
 import pickle
 
 liveFlag    = 4
+pushFlag    = 0
 
 takePicFlag = False
 sleepFlag   = False
-pushFlag    = False 
+
 
 mytft    = 0
 font     = 0
@@ -43,11 +44,11 @@ def liveFeed(channel):
 
     print "event", channel, GPIO.input(channel)
 
-    if liveFlag == 1:
-        liveFlag = 2
+    #if liveFlag == 1:
+    #    liveFlag = 2
         
-    elif liveFlag == 3:
-        liveFlag = 4
+    #elif liveFlag == 3:
+    #    liveFlag = 4
 
     print "live feed is " + str(liveFlag)
 
@@ -56,10 +57,13 @@ def gitPush(channel):
 
     print "event", channel, GPIO.input(channel) 
     
-    pushFlag = True
+    if pushFlag == 1:
+        pushFlag = 2
+    else:
+        pushFlag = 1
 
     if liveFlag == 1:
-        liveFlag = 2
+        liveFlag = 3
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -137,10 +141,6 @@ def main():
     #companyName = os.getenv('STOCK', "GE")
     #print 'company name: '+companyName
 
-    #The default MARKET is NASDAQ
-    #marketName = os.getenv('MARKET', "NASDAQ")
-    #print 'market name: '+marketName
-
     logo = pygame.image.load( "/usr/src/app/resin.png")
     mytft.screen.blit(logo, (0, 0))
 
@@ -197,14 +197,11 @@ def main():
                 #camera.resolution = (1024,768)
                 name = 'image.jpg'
 
-                liveFlag = 2
+                liveFlag = 1
+                pushFlag = 0
                 takePicFlag = False
                 camera.capture(name, resize=(320, 240))
-                #camera.close()
-                #time.sleep(0.1)
-                #camera.capture(name)
                 time.sleep(0.1)
-                camera.close()
 
                 print "Pic to screen"
                 logo = pygame.image.load(name)
@@ -214,33 +211,37 @@ def main():
                 # # refresh the screen with all the changes
                 pygame.display.update()
                 print "Screen updated"
-        elif liveFlag == 2:
-            
-            camera.close()
-            
-            logo = pygame.image.load( "/usr/src/app/resin.png")
-            mytft.screen.blit(logo, (0, 0))
+                time.sleep(10)
+                camera.resolution = sizeData[sizeMode][1]
+                camera.crop       = (0.0, 0.0, 1.0, 1.0)
 
-            pygame.display.update()
+        # elif liveFlag == 2:
+            
+        #     camera.close()
+            
+        #     logo = pygame.image.load( "/usr/src/app/resin.png")
+        #     mytft.screen.blit(logo, (0, 0))
 
-            liveFlag = 3
+        #     pygame.display.update()
+
+        #     liveFlag = 3
 
         elif liveFlag == 3:
-            if takePicFlag:
-                name = 'image.jpg'
-                if os.path.isfile(name) :
-                    print "Previous pic to screen"
-                    logo = pygame.image.load(name)
-                    mytft.screen.blit(logo, (0, 0))
+            # if takePicFlag:
+            #     name = 'image.jpg'
+            #     if os.path.isfile(name) :
+            #         print "Previous pic to screen"
+            #         logo = pygame.image.load(name)
+            #         mytft.screen.blit(logo, (0, 0))
 
-                    #pygame.display.flip()
-                    # # refresh the screen with all the changes
-                    pygame.display.update()
-                else :
-                    print "no Pic found"
-                takePicFlag = False
+            #         #pygame.display.flip()
+            #         # # refresh the screen with all the changes
+            #         pygame.display.update()
+            #     else :
+            #         print "no Pic found"
+            #     takePicFlag = False
             
-            elif pushFlag :
+            if pushFlag == 1:
 
                 colourWhite = (255, 255, 255)
                 colourBlack = (0, 0, 0)
@@ -361,7 +362,12 @@ def main():
                     
                     time.sleep(0.1)           
 
-                time.sleep(5)
+                time.sleep(10)
+
+
+
+            else:
+
 
                 mytft.screen.fill(colourBlack)
 
@@ -385,15 +391,6 @@ def main():
                     print(line)
                     line = stripped(line)
 
-                    #text_surface = font.render(line, True, color)
-                    #mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-                    #pygame.display.update()
-                    #textAnchorY += textYoffset
-                    #if textAnchorY + textYoffset > 240:
-                    #    textAnchorY = 10
-                    #    mytft.screen.fill(colourBlack)
-
                     if line.find("Build took") == 0 :
                         print "Unicorn found"
                         color = colourPink
@@ -416,17 +413,13 @@ def main():
 
                     pygame.display.update()
 
-                    #time.sleep(0.1)
+                    time.sleep(0.1)
 
-                line = "Finished"
-                print line
-                #text_surface = font.render(line, True, colourGreen)
-                #mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                #pygame.display.update()
+                pushFlag = 0
+                time.sleep(10)
 
-                pushFlag = False 
-
-            time.sleep(1)
+            liveFlag = 1
+            
         elif liveFlag == 4:
 
             t = Timer(30.0, sleepMode)
@@ -439,58 +432,6 @@ def main():
 
             liveFlag = 1
         
-        #quote = c.get(companyName,marketName)
-        #stockTitle = 'Stock: ' + str(quote["t"])
-        #print stockTitle
-        #stockPrice = 'Price: $' + str(quote["l_cur"])
-        #print stockPrice
-        #stockChange = str(quote["c"])
-        #print stockChange
-        #stockPercentChange = '(' + str(quote["cp"]) + '%)'
-        #print stockPercentChange
-
-        #check if + or -, and display correct arrow and font color
-        #if float(quote["c"]) < 0:
-        #    changeColour = colourRed
-        #    arrowIcon = "red_arrow.png"
-        #    print 'font colour red'
-        #else:
-        #    changeColour = colourGreen
-        #    arrowIcon = "green_arrow.png"
-        #    print 'font colour green'
-
-        # clear the screen
-        #mytft.screen.fill(colourBlack)
-        # set the anchor/positions for the current stock data text
-        # textAnchorX = 10
-        # textAnchorY = 10
-        # textYoffset = 40
-
-        #print the stock title to screen
-        # text_surface = font.render(stockTitle, True, colourWhite)
-        # mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        # #print the stock price to screen
-        # textAnchorY+=textYoffset
-        # text_surface = font.render(stockPrice, True, colourWhite)
-        # mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        # #print the stock change value to screen
-        # textAnchorY = textAnchorY + textYoffset*2
-        # text_surface = font.render(stockChange, True, changeColour)
-        # mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        # #print the stock change percentage to screen
-        # textAnchorY+=textYoffset
-        # text_surface = font.render(stockPercentChange, True, changeColour)
-        # mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-        # #add the icon to the screen
-        # icon = installPath+ arrowIcon
-        # logo = pygame.image.load(icon).convert()
-
-
-        # Wait 'updateRate' seconds until next update
         #time.sleep(1)
 
 if __name__ == '__main__':
