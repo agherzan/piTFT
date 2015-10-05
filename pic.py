@@ -12,61 +12,41 @@ import yuv2rgb
 from threading import Timer
 import pickle
 
-liveFlag    = 4
-pushFlag    = 0
-
-takePicFlag = False
-sleepFlag   = False
-
-
-mytft    = 0
-font     = 0
-camera   = 0
-sizeData = 0
-sizeMode = 0
+liveFlag    = 0
 
 os.chdir("/data/piTFT_mBeast")
 
-def sleepMode():
-    global pushFlag
-    print "You can take push again"
-
-    pushFlag = 0
-
-def picButton(channel):
-    global takePicFlag
-    print "event", channel, GPIO.input(channel) 
-    takePicFlag = True
-
-def liveFeed(channel):
+def redB(channel):
     global liveFlag
 
     print "event", channel, GPIO.input(channel)
 
-    #if liveFlag == 1:
-    #    liveFlag = 2
-        
-    #elif liveFlag == 3:
-    #    liveFlag = 4
+    if liveFlag == 3:
+        liveFlag = 1
 
     print "live feed is " + str(liveFlag)
 
-def gitPush(channel):
-    global pushFlag, liveFlag 
+def greenB(channel):
+    global liveFlag 
 
     print "event", channel, GPIO.input(channel) 
     
-    if pushFlag == 2:
-        pushFlag = 3
+    if liveFlag == 1:
+        liveFlag = 2
 
-        if liveFlag == 1:
-            liveFlag = 3
+    elif liveFlag == 3:
+        liveFlag = 4
 
-    elif pushFlag == 0:
-        pushFlag = 1
+    elif liveFlag == 5:
+        liveFlag = 6
 
-        if liveFlag == 1:
-            liveFlag = 3
+    elif liveFlag == 7:
+        liveFlag = 8
+
+    elif liveFlag == 9:
+        liveFlag = 1
+
+    print "live feed is " + str(liveFlag)
 
 #set up the screen so we can push stuff onto it.
 class pitft :
@@ -118,7 +98,7 @@ class pitft :
         "Destructor to make sure pygame shuts down, etc."
 
 def main():
-    global mytft, font, liveFlag, takePicFlag, pushFlag, camera, sizeMode, sizeData
+    global liveFlag 
 
     #this path is where we store our arrow icons
     installPath = "/usr/src/app/img/"
@@ -153,14 +133,14 @@ def main():
 
     GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
+#    GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)  
 #    GPIO.setup(18, GPIO.IN, pull_up_down=GPIO.PUD_UP) 
 
  
 #    GPIO.add_event_detect(18, GPIO.RISING, callback=picView)  # add rising edge detection on a channel
-    GPIO.add_event_detect(27, GPIO.RISING, callback=liveFeed)  # add rising edge detection on a channel    
-    GPIO.add_event_detect(23, GPIO.RISING, callback=picButton)  # add rising edge detection on a channel
-    GPIO.add_event_detect(22, GPIO.RISING, callback=gitPush)  # add rising edge detection on a channel
+#    GPIO.add_event_detect(27, GPIO.RISING, callback=liveFeed)  # add rising edge detection on a channel    
+    GPIO.add_event_detect(23, GPIO.RISING, callback=redB)  # add rising edge detection on a channel
+    GPIO.add_event_detect(22, GPIO.RISING, callback=greenB)  # add rising edge detection on a channel
 
 
     sizeMode = 0
@@ -177,9 +157,31 @@ def main():
 
     updates = pickle.load(open( "save.p", "rb" ) )
 
+    stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
+
+    colourWhite = (255, 255, 255)
+    colourBlack = (0, 0, 0)
+    colourGreen = (3, 192, 60)
+    colourRed = (220, 69, 69)
+    colourPink = (255, 20, 147)
+
+    textAnchorX = 10
+    textAnchorY = 10
+    textYoffset = 10
+    listMax = 240/textYoffset
+
     while True:
 
-        if liveFlag == 1:
+        if liveFlag == 0:
+
+            camera            = picamera.PiCamera()
+
+            camera.resolution = sizeData[sizeMode][1]
+            camera.crop       = (0.0, 0.0, 1.0, 1.0)
+
+            liveFlag = 1
+
+        elif liveFlag == 1:
 
             stream = io.BytesIO() # Capture into in-memory stream
             camera.capture(stream, use_video_port=True, format='raw')
@@ -195,238 +197,186 @@ def main():
 
             pygame.display.update()
 
-            if takePicFlag :
-                print "taking pic"
-                #camera.resolution = (1024,768)
-                name = 'image.jpg'
+        elif liveFlag == 2:
+            print "taking pic"
+            #camera.resolution = (1024,768)
+            name = 'image.jpg'
 
-                liveFlag = 3
-                pushFlag = 0
-                takePicFlag = False
-                camera.capture(name, resize=(320, 240))
-                time.sleep(0.1)
+            camera.capture(name, resize=(320, 240))
+            #time.sleep(0.1)
 
-                print "Pic to screen"
-                logo = pygame.image.load(name)
-                mytft.screen.blit(logo, (0, 0))
+            print "Pic to screen"
+            logo = pygame.image.load(name)
+            mytft.screen.blit(logo, (0, 0))
 
-                #pygame.display.flip()
-                # # refresh the screen with all the changes
-                pygame.display.update()
-                print "Screen updated"
-                time.sleep(5)
-                camera.resolution = sizeData[sizeMode][1]
-                camera.crop       = (0.0, 0.0, 1.0, 1.0)
-
-        # elif liveFlag == 2:
-            
-        #     camera.close()
-            
-        #     logo = pygame.image.load( "/usr/src/app/resin.png")
-        #     mytft.screen.blit(logo, (0, 0))
-
-        #     pygame.display.update()
-
-        #     liveFlag = 3
-
-        elif liveFlag == 3:
-            
-            if pushFlag == 1:
-
-                colourWhite = (255, 255, 255)
-                colourBlack = (0, 0, 0)
-                colourGreen = (3, 192, 60)
-                colourRed = (220, 69, 69)
-                colourPink = (255, 20, 147)
-
-                noCommitFlag = False
-
-                # clear the screen
-                mytft.screen.fill(colourBlack)
-                # set the anchor/positions for the current stock data text
-                textAnchorX = 10
-                textAnchorY = 10
-                textYoffset = 10
-                listMax = 240/textYoffset
-
-                line = "git status"
-                print line
-                text_surface = font.render(line, True, colourRed)
-                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                textAnchorY += textYoffset
-                pygame.display.update()
-
-                stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
-
-
-                for line in sh.git( "status", _iter=True):
-                    print(line)
-                    line = stripped(line)
-
-                    if line.find("nothing to commit") == 0 :
-                        print "found"
-                        noCommitFlag = True
-
-                    text_surface = font.render(line, True, colourWhite)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-                    pygame.display.update()
-                    textAnchorY += textYoffset
-                    if textAnchorY + textYoffset > 240:
-                        textAnchorY = 10
-                        mytft.screen.fill(colourBlack)
-
-                    time.sleep(0.1)
-
-                if noCommitFlag == True:
-
-                    line = "Please take a Pic "
-                    print line
-                    text_surface = font.render(line, True, colourRed)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-                    pygame.display.update()
-
-                    pushFlag = 0 
-
-                    continue
-
-                updates += 1 
-                pickle.dump( updates, open( "save.p", "wb" ))
-
-                time.sleep(5)
-
-                mytft.screen.fill(colourBlack)
-
-                textAnchorX = 10
-                textAnchorY = 10    
-
-                line = "git add ."
-                print line
-                text_surface = font.render(line, True, colourRed)
-                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                textAnchorY += textYoffset
-                pygame.display.update()
-
-                for line in sh.git.add ("image.jpg", "save.p", _iter=True):
-                    print(line)
-                    line = stripped(line)
-
-                    text_surface = font.render(line, True, colourWhite)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-                    pygame.display.update()
-                    textAnchorY += textYoffset
-                    if textAnchorY + textYoffset > 240:
-                        textAnchorY = 10
-                        mytft.screen.fill(colourBlack)
-
-                    time.sleep(0.1)
-
-                time.sleep(5)
-
-                mytft.screen.fill(colourBlack)
-
-                textAnchorX = 10
-                textAnchorY = 10
-
-                line = "git commit -m "
-                print line
-                text_surface = font.render(line, True, colourRed)
-                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                textAnchorY += textYoffset
-                pygame.display.update()
-
-                for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
-                    print(line)
-                    line = stripped(line)
-
-                    text_surface = font.render(line, True, colourWhite)
-                    mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-
-                    pygame.display.update()
-                    textAnchorY += textYoffset
-                    if textAnchorY + textYoffset > 240:
-                        textAnchorY = 10
-                        mytft.screen.fill(colourBlack)
-                    
-                    time.sleep(0.1)           
-
-                pushFlag = 2
-                     
-                time.sleep(10)
-
-
-
-            elif pushFlag == 3:
-
-
-                mytft.screen.fill(colourBlack)
-
-                textAnchorX = 10
-                textAnchorY = 10
-
-                line = "git push resin master"
-                print line
-                text_surface = font.render(line, True, colourRed)
-                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                textAnchorY += textYoffset
-                pygame.display.update()
-
-                color = colourWhite
-
-                sc = []
-
-                sc.append("git push resin master")
-
-                for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
-                    print(line)
-                    line = stripped(line)
-
-                    color = colourWhite                    
-
-                    sc.append(line)
-                    if len(sc) >= listMax :
-                        sc.pop(1)
-
-                    textAnchorY = 0
-                    mytft.screen.fill(colourBlack)
-                    for idx, lines in enumerate(sc):
-                        if idx == 0:
-                            text_surface = font.render(lines, True, colourRed)
-                            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                            textAnchorY += textYoffset
-                        else:
-                            if lines.find("Build took") == 0 or  lines.find("_.-(6") == 0 :
-                                print "Unicorn found"
-                                color = colourPink
-
-                            text_surface = font.render(lines, True, color)
-                            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                            textAnchorY += textYoffset
-
-                    pygame.display.update()
-
-                    time.sleep(0.1)
-
-                pushFlag = 0
-
-                #t = Timer(30.0, sleepMode)
-                #t.start() 
-                
-                
-                time.sleep(10)
-
-            liveFlag = 1
-            
-        elif liveFlag == 4:
-
-            camera            = picamera.PiCamera()
-
+            #pygame.display.flip()
+            # # refresh the screen with all the changes
+            pygame.display.update()
+            print "Screen updated"
+            time.sleep(0.1)
             camera.resolution = sizeData[sizeMode][1]
             camera.crop       = (0.0, 0.0, 1.0, 1.0)
 
-            liveFlag = 1
+            liveFlag = 3
+
+
+        elif liveFlag == 4:
+            
+            # clear the screen
+            mytft.screen.fill(colourBlack)
+            # set the anchor/positions for the current stock data text
+            textAnchorX = 10
+            textAnchorY = 10
+
+            line = "git status"
+            print line
+            text_surface = font.render(line, True, colourRed)
+            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+            textAnchorY += textYoffset
+            pygame.display.update()
+
+            for line in sh.git( "status", _iter=True):
+                print(line)
+                line = stripped(line)
+
+                text_surface = font.render(line, True, colourWhite)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                pygame.display.update()
+                textAnchorY += textYoffset
+                if textAnchorY + textYoffset > 240:
+                    textAnchorY = 10
+                    mytft.screen.fill(colourBlack)
+
+                time.sleep(0.1)
+
+            updates += 1 
+            pickle.dump( updates, open( "save.p", "wb" ))
+
+            mytft.screen.fill(colourBlack)
+
+            textAnchorX = 10
+            textAnchorY = 10    
+
+            line = "git add ."
+            print line
+            text_surface = font.render(line, True, colourRed)
+            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+            textAnchorY += textYoffset
+            pygame.display.update()
+
+            for line in sh.git.add ("image.jpg", "save.p", _iter=True):
+                print(line)
+                line = stripped(line)
+
+                text_surface = font.render(line, True, colourWhite)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                pygame.display.update()
+                textAnchorY += textYoffset
+                if textAnchorY + textYoffset > 240:
+                    textAnchorY = 10
+                    mytft.screen.fill(colourBlack)
+
+                time.sleep(0.1)
+
+            liveFlag = 5
+
+        elif liveFlag == 6:
+
+            mytft.screen.fill(colourBlack)
+
+            textAnchorX = 10
+            textAnchorY = 10
+
+            line = "git commit -m "
+            print line
+            text_surface = font.render(line, True, colourRed)
+            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+            textAnchorY += textYoffset
+            pygame.display.update()
+
+            for line in sh.git( "commit", "-m", "Auto commit", _iter="out"):
+                print(line)
+                line = stripped(line)
+
+                text_surface = font.render(line, True, colourWhite)
+                mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+
+                pygame.display.update()
+                textAnchorY += textYoffset
+                if textAnchorY + textYoffset > 240:
+                    textAnchorY = 10
+                    mytft.screen.fill(colourBlack)
+                
+                time.sleep(0.1)           
+                 
+            liveFlag = 7
+
+        elif liveFlag == 8:
+
+            mytft.screen.fill(colourBlack)
+
+            textAnchorX = 10
+            textAnchorY = 10
+
+            line = "git push resin master"
+            print line
+            text_surface = font.render(line, True, colourRed)
+            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+            textAnchorY += textYoffset
+            pygame.display.update()
+
+            color = colourWhite
+
+            sc = []
+
+            sc.append("git push resin master")
+
+            for line in sh.git( "push", "resin", "master", "--force", _iter="err"):
+                print(line)
+                line = stripped(line)
+
+                color = colourWhite                    
+
+                sc.append(line)
+                if len(sc) >= listMax :
+                    sc.pop(1)
+
+                textAnchorY = 0
+                mytft.screen.fill(colourBlack)
+                for idx, lines in enumerate(sc):
+                    if idx == 0:
+                        text_surface = font.render(lines, True, colourRed)
+                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                        textAnchorY += textYoffset
+                    else:
+                        if lines.find("Build took") == 0 or  lines.find("_.-(6") == 0 :
+                            print "Unicorn found"
+                            color = colourPink
+
+                        text_surface = font.render(lines, True, color)
+                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                        textAnchorY += textYoffset
+
+                pygame.display.update()
+
+                time.sleep(0.1)
+
+            liveFlag = 9
+
+        elif liveFlag == 10:
+
+        
+            camera.close()
+        
+            logo = pygame.image.load( "/usr/src/app/resin.png")
+            mytft.screen.blit(logo, (0, 0))
+
+            pygame.display.update()
+
+            liveFlag = 11               
+            
         
         #time.sleep(1)
 
