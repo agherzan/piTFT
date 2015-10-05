@@ -250,6 +250,8 @@ def main():
 
                 time.sleep(0.1)
 
+            time.sleep(3)
+
             updates += 1 
             pickle.dump( updates, open( "save.p", "wb" ))
 
@@ -351,7 +353,7 @@ def main():
                         mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
                         textAnchorY += textYoffset
                     else:
-                        if lines.find("Build took") >= 0 or  lines.find("_.-(6") >= 0 :
+                        if lines.find("Build took") >= 0 or  lines.find(">\\/7") >= 0 :
                             print "Unicorn found"
                             color = colourPink
 
@@ -376,9 +378,10 @@ def main():
             pygame.display.update()
 
             liveFlag = 11               
-            
         
-        #time.sleep(1)
+        else :   
+        
+            time.sleep(1)
 
 if __name__ == '__main__':
     print 'starting main()'
