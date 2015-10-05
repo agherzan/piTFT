@@ -351,7 +351,7 @@ def main():
                         mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
                         textAnchorY += textYoffset
                     else:
-                        if lines.find("Build took") == 0 or  lines.find("_.-(6") == 0 :
+                        if lines.find("Build took") >= 0 or  lines.find("_.-(6") >= 0 :
                             print "Unicorn found"
                             color = colourPink
 
