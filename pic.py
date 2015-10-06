@@ -271,7 +271,7 @@ def main():
             textAnchorY += textYoffset
             pygame.display.update()
 
-            for line in sh.git.add ("image.jpg", "save.p", _iter=True):
+            for line in sh.git.add ("image.jpg", "update_count.txt", _iter=True):
                 print(line)
                 line = stripped(line)
 
