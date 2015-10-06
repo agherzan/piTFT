@@ -53,7 +53,7 @@ if [ -d "$DIRECTORY" ]; then
 else
 	echo "Project doesnt exist, cloning"
 	cd /data
-	git clone https://github.com/nchronas/piTFT_mBeast.git
+	git clone https://github.com/petrosagg/piTFT_mBeast.git
 	cd /data/piTFT_mBeast
 
 	git remote add resin $REMOTE
