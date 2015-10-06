@@ -10,7 +10,6 @@ import sh
 import io
 import yuv2rgb
 from threading import Timer
-import pickle
 
 liveFlag    = 0
 
@@ -155,7 +154,8 @@ def main():
     rgb = bytearray(320 * 240 * 3)
     yuv = bytearray(320 * 240 * 3 / 2)
 
-    updates = pickle.load(open( "save.p", "rb" ) )
+    with open('update_count.txt','rb') as f:
+        updates = int(f.readline())
 
     stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
 
@@ -252,8 +252,9 @@ def main():
 
             time.sleep(3)
 
-            updates += 1 
-            pickle.dump( updates, open( "save.p", "wb" ))
+            updates += 1
+            with open('update_count.txt','wb') as f:
+                f.write(str(updates))
 
             mytft.screen.fill(colourBlack)
 
