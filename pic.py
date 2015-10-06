@@ -154,8 +154,11 @@ def main():
     rgb = bytearray(320 * 240 * 3)
     yuv = bytearray(320 * 240 * 3 / 2)
 
-    with open('update_count.txt','rb') as f:
-        updates = int(f.readline())
+    if os.path.isfile('update_count.txt'):
+        with open('update_count.txt','rb') as f:
+            updates = int(f.readline())
+    else:
+        updates = 0
 
     stripped = lambda s: "".join(i for i in s if 31 < ord(i) < 127)
 
