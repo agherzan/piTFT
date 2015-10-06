@@ -57,13 +57,15 @@ else
 	cd /data/piTFT_mBeast
 
 	git remote add resin $REMOTE
-	arr=($(printenv | awk -F "=" '{print $1}' | grep REMOTE_ADD_))
-	for i in ${arr[*]}
-	do
-			eval a=\$$i
-	        echo adding remote $i $a
-	        git remote set-url --add resin $a
-	done
+	if [ "${PUSHTOALL}" == "TRUE" ]; then
+	    arr=($(printenv | awk -F "=" '{print $1}' | grep REMOTE_ADD_))
+	    for i in ${arr[*]}
+	    do
+		eval a=\$$i
+		echo adding remote $i $a
+		git remote set-url --add resin $a
+	    done
+	fi
 
 fi
 
