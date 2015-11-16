@@ -353,9 +353,12 @@ def main():
                 mytft.screen.fill(colourBlack)
                 for idx, lines in enumerate(sc):
                     if idx == 0:
-                        text_surface = font.render(lines, True, colourRed)
-                        mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
-                        textAnchorY += textYoffset
+                        try:
+                            text_surface = font.render(lines, True, colourRed)
+                            mytft.screen.blit(text_surface, (textAnchorX, textAnchorY))
+                            textAnchorY += textYoffset
+                        except:
+                            print "Could not render"
                     else:
                         if lines.find("Build took") >= 0 or  lines.find(">\\/7") >= 0 :
                             print "Unicorn found"
